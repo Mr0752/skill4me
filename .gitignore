@@ -1,0 +1,18 @@
+# CodeBuddy 本地数据（含会话记忆，勿上传）
+.codebuddy/
+
+# 依赖
+node_modules/
+
+# 日志与临时文件
+*.log
+npm-debug.log*
+yarn-error.log*
+.DS_Store
+Thumbs.db
+
+# 小程序私有配置
+project.private.config.json
+
+# 压测/临时产物
+*.tmp
