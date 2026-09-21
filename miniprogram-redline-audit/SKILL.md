@@ -1,6 +1,6 @@
 ---
 name: miniprogram-redline-audit
-description: 自动审计微信小程序（含云开发）是否踩中开发红线。当用户说"审计/检查/扫描我的小程序红线""提审前帮我排查风险""真机白屏/列表错乱排查""检查一下有没有盲轮询、可选链、手写 storage 前缀、tabBar 跳转"等时使用。技能会扫描指定小程序目录，输出按严重度分组的红线审计报告（JS 真机不兼容语法、setInterval 盲轮询、navigateTo 跳 tabBar、手写 storage key、wx:key="index"、{{}} 方法调用/中文键、<b> 组件等），每条标注违反的红线条目与修复法，可直接当提审前体检。
+description: 自动审计微信小程序（含云开发）是否踩中开发红线。当用户说"审计/检查/扫描我的小程序红线""提审前帮我排查风险""真机白屏/列表错乱排查""检查一下有没有盲轮询、可选链、手写 storage 前缀、tabBar 跳转""页面四件套缺失""导航/事件/数据/孤儿页闭环"等时使用。技能会扫描指定小程序目录，输出按严重度分组的红线审计报告（JS 真机不兼容语法、setInterval 盲轮询、navigateTo 跳 tabBar、手写 storage key、wx:key="index"、{{}} 方法调用/中文键、<b> 组件、页面四件套、四层交互闭环等），每条标注违反的红线条目与修复法，可直接当提审前体检。
 ---
 
 # 小程序红线自动审计（工具型 Skill）
@@ -66,8 +66,24 @@ $ node audit-redlines.js miniprogram
 
 加 `--strict`（或 `-w`）额外启用实验性 WXML 启发式（可能误报，仅参考）：`{{}}` 内方法调用、`{{}}` 内中文键、WXML `<b>` 组件。
 
+> 主审计器不覆盖「页面四件套完整性」与「四层交互闭环」，请额外运行「附加独立脚本」一节的两个脚本补齐（见下文）。
+
+## 附加独立脚本（补充主审计器未覆盖项，按需运行）
+
+主 `audit-redlines.js` 不覆盖「四件套完整性」与「四层交互闭环」，需用以下两个独立脚本补齐（`--help` 看用法，零依赖）：
+
+- `node scripts/audit-paths.js <根目录>` — 页面四件套完整性（js/json/wxml/wxss 齐全）+ `app.json` 注册校验；自动排除 `components/` 避免组件被误判为孤儿页面。
+- `node scripts/audit-closure.js <根目录>` — 四层交互闭环：
+  1. **导航闭环**：目标页存在、API 与页类型匹配（TabBar 页只用 switchTab）、路径为绝对路径；
+  2. **事件闭环**：每个 `bindXxx`/`catchXxx` 方法都在对应页面 JS 的 `Page()` 顶层方法中存在；
+  3. **数据闭环**：Storage 写入键都有读取（死键 0），只读未写列出供人工确认（云端/外部注入）；
+  4. **孤儿页**：每个页面都有入口（被某处 navigate 指向或在 TabBar）。
+  - 业务强相关项（导航封装名、Storage 读写正则、键前缀）在脚本顶部 `CFG` 配置，按项目改，不改逻辑。本项目 Storage 封装自动加 `xwv14_` 前缀时，设 `CFG.KEY_PREFIX='xwv14_'` 即可消除数据闭环噪声。
+
 ## 文件索引
 - `scripts/audit-redlines.js` — 审计主程序（零依赖，扫描任意小程序目录，`--help` 看用法）。
+- `scripts/audit-paths.js` — 页面四件套完整性 + app.json 注册校验（排除 components 误报）。
+- `scripts/audit-closure.js` — 四层交互闭环（导航/事件/数据/孤儿页），业务项经顶部 CFG 配置。
 - `references/redlines.md` — 通用红线知识库（每条审计发现按 id 引用）。
 - `references/fix-examples.md` — 逐条修复前后代码对照（改哪条抄哪条）。
 - `references/faq.md` — 常见问题：跑不起来、报告解读、误报漏报边界。
@@ -76,13 +92,13 @@ $ node audit-redlines.js miniprogram
 
 ## 同步维护约定（改动本 Skill 时必读）
 
-本 Skill 的同一套知识有三个对外视图，**任何红线新增/修改/编号调整、脚本能力变更、包内文件变动，必须同时同步三处**：
+本 Skill 以 **`references/redlines.md` 为编号权威源**，改动时需保持两处对外视图一致：
 
 1. `miniprogram-redline-audit/SKILL.md`（本文件：执行流程、审计覆盖、输出示例、异常处理）
 2. `miniprogram-redline-audit/上架文案.md`（对外文案：卖点、使用方式、输出示例、包内文件清单）
-3. `小程序开发红线与避坑指南.md`（完整版指南，带项目实例；其 `红线 X-Y` 编号必须与 `references/redlines.md` 严格一致）
 
-编号权威源：`references/redlines.md`。改完三处后重新打包 `miniprogram-redline-audit.zip`（顶层目录 + 正斜杠路径 + 中文名 UTF-8 标志）。
+改完两处后重新打包 `miniprogram-redline-audit.zip`（顶层目录 + 正斜杠路径 + 中文名 UTF-8 标志）。
+（可选）若你在自己的仓库里维护了完整版《小程序开发红线与避坑指南.md》，其 `红线 X-Y` 编号须与 `references/redlines.md` 严格一致。
 
 ## 已知局限（如实告知用户）
 - 建议项基于正则启发式，可能误报（`(a+b)` 分组会被当成方法调用、合法中文键在部分基础库可用）。硬红线精度高、可信。
