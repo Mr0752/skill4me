@@ -1,4 +1,9 @@
 ---
+slug: mr0752-wx-mp-redline-audit
+displayName: 小程序红线自动审计
+version: 1.0.0
+summary: 零依赖扫描微信小程序红线（真机语法/WXML/tabBar/存储/四件套/交互闭环），提审前体检。
+license: MIT
 name: miniprogram-redline-audit
 description: 自动审计微信小程序（含云开发）是否踩中开发红线。当用户说"审计/检查/扫描我的小程序红线""提审前帮我排查风险""真机白屏/列表错乱排查""检查一下有没有盲轮询、可选链、手写 storage 前缀、tabBar 跳转""页面四件套缺失""导航/事件/数据/孤儿页闭环"等时使用。技能会扫描指定小程序目录，输出按严重度分组的红线审计报告（JS 真机不兼容语法、setInterval 盲轮询、navigateTo 跳 tabBar、手写 storage key、wx:key="index"、{{}} 方法调用/中文键、<b> 组件、页面四件套、四层交互闭环等），每条标注违反的红线条目与修复法，可直接当提审前体检。
 ---
@@ -78,7 +83,7 @@ $ node audit-redlines.js miniprogram
   2. **事件闭环**：每个 `bindXxx`/`catchXxx` 方法都在对应页面 JS 的 `Page()` 顶层方法中存在；
   3. **数据闭环**：Storage 写入键都有读取（死键 0），只读未写列出供人工确认（云端/外部注入）；
   4. **孤儿页**：每个页面都有入口（被某处 navigate 指向或在 TabBar）。
-  - 业务强相关项（导航封装名、Storage 读写正则、键前缀）在脚本顶部 `CFG` 配置，按项目改，不改逻辑。本项目 Storage 封装自动加 `xwv14_` 前缀时，设 `CFG.KEY_PREFIX='xwv14_'` 即可消除数据闭环噪声。
+  - 业务强相关项（导航封装名、Storage 读写正则、键前缀）在脚本顶部 `CFG` 配置，按项目改，不改逻辑。若你的 Storage 封装自动加前缀（如 `'myapp_'`），设 `CFG.KEY_PREFIX='myapp_'` 即可消除数据闭环噪声。
 
 ## 文件索引
 - `scripts/audit-redlines.js` — 审计主程序（零依赖，扫描任意小程序目录，`--help` 看用法）。

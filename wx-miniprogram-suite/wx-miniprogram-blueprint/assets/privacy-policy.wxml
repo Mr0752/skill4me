@@ -1,0 +1,22 @@
+<!-- packageA/pages/privacy/privacy.wxml —— 隐私政策模板（参数化） -->
+<!-- js 里从 utils/env.js 取下列字段 setData：appName/contactEmail/legalEntity/icpNo/jurisdiction/policyDate -->
+<view class="doc">
+  <view class="title">{{appName}} 隐私政策</view>
+  <view class="date">最后更新：{{policyDate}}</view>
+
+  <view class="h">一、我们如何收集和使用您的信息</view>
+  <view class="p">1.1 当您使用{{appName}}时，我们可能收集您主动提供或在使用过程中产生的信息，包括但不限于账号信息、操作记录。我们仅在为实现产品功能所必需的最小范围内收集。</view>
+  <view class="p">1.2 进入应用时我们不会主动收集您的头像与昵称；仅在您主动编辑个人资料时获取，且头像仅存储于您的本机设备。</view>
+
+  <view class="h">二、信息的存储与保护</view>
+  <view class="p">2.1 您的云端数据存储在腾讯云开发环境，我们采取合理的技术措施保护信息安全。</view>
+  <view class="p">2.2 您可在「设置 → 数据安全 → 清除云端数据」中删除您的云端数据。</view>
+
+  <view class="h">三、您的权利</view>
+  <view class="p">3.1 您有权查询、更正、删除您的个人信息，并可随时撤回授权。</view>
+
+  <view class="h">四、联系我们</view>
+  <view class="p">如对隐私政策有疑问，可通过邮箱 {{contactEmail}} 联系{{legalEntity}}。</view>
+
+  <view class="footer">主体：{{legalEntity}}　管辖：{{jurisdiction}}</view>
+</view>

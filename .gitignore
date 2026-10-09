@@ -16,3 +16,9 @@ project.private.config.json
 
 # 压测/临时产物
 *.tmp
+
+# Skill zip 包（发布产物/二进制，不进 git）
+*.zip
+
+# 旧版备份（本地保留即可，不进远程仓库；历史版本用 git 回退）
+_archive/

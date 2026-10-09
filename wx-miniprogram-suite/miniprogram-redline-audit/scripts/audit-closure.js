@@ -13,7 +13,7 @@
  * 业务强相关项全部下沉到顶部 CFG，按项目改这里即可，不要改逻辑正文:
  *   - 导航封装名(若项目用 app.navTo 之类)
  *   - Storage 封装读写正则(若项目用 app.S/app.L 之类)
- *   - Storage 键前缀(若项目封装自动加前缀，如某些项目加 'xwv14_')
+ *   - Storage 键前缀(若项目封装自动加前缀，如 'myapp_')
  *
  * 返回码: 0 = 无阻断; 1 = 有阻断(导航 / 事件)。
  */
@@ -39,12 +39,12 @@ const CFG = {
     /wx\.getStorageSync\(\s*'([^']+)'/g,
     /wx\.getStorage\(\s*\{\s*key\s*:\s*'([^']+)'/g,
   ],
-  // 若项目 Storage 封装自动加前缀，填在这里(如 'xwv14_')；否则留空
+  // 若项目 Storage 封装自动加前缀，填在这里(如 'myapp_')；否则留空
   KEY_PREFIX: '',
 };
 // ========================
 
-const IGNORE_DIR = new Set(['node_modules', 'miniprogram_npm', '_lib', 'cloudfunctions', '.git', 'dist', 'assets']);
+const IGNORE_DIR = new Set(['node_modules', 'miniprogram_npm', '_lib', 'cloudfunctions', '.git', 'dist', 'assets', '.codebuddy']);
 
 function walk(dir, out, exts) {
   out = out || [];
@@ -83,14 +83,21 @@ function collectPages() {
   return { pages: pages, pageSet: pageSet, tabSet: tabSet };
 }
 
-// ---- 提取 Page() 顶层方法名 ----
-function extractPageMethods(src) {
-  const idx = src.indexOf('Page(');
-  if (idx < 0) return null;
-  const start = src.indexOf('{', idx);
-  if (start < 0) return null;
+// ---- 提取页面方法名（兼容 Page({...}) 与 Page(Extras.enhance(PAGE, {...})) 包装） ----
+function findMatchParen(src, openIdx) {
+  let depth = 0;
+  for (let k = openIdx; k < src.length; k++) {
+    const c = src[k];
+    if (c === '(') depth++;
+    else if (c === ')') { depth--; if (depth === 0) return k; }
+  }
+  return -1;
+}
+
+// 提取从 openBraceIndex（指向 '{'）开始的对象字面量内的顶层方法名
+function methodsInBrace(src, openIdx) {
   let depth = 0, end = -1, inStr = null;
-  for (let k = start; k < src.length; k++) {
+  for (let k = openIdx; k < src.length; k++) {
     const c = src[k];
     if (inStr) { if (c === '\\') { k++; continue; } if (c === inStr) inStr = null; continue; }
     if (c === '"' || c === "'" || c === '`') { inStr = c; continue; }
@@ -99,8 +106,8 @@ function extractPageMethods(src) {
     if (c === '{') depth++;
     else if (c === '}') { depth--; if (depth === 0) { end = k; break; } }
   }
-  if (end < 0) return null;
-  const body = src.slice(start + 1, end);
+  if (end < 0) return [];
+  const body = src.slice(openIdx + 1, end);
   const depthAt = new Array(body.length);
   let d = 0, s2 = null;
   for (let k = 0; k < body.length; k++) {
@@ -120,6 +127,46 @@ function extractPageMethods(src) {
   const re = /(?:async\s+)?([A-Za-z_$][\w$]*)\s*(?=[:(])/g;
   let m;
   while ((m = re.exec(body))) if (depthAt[m.index] === 0) names.push(m[1]);
+  return names;
+}
+
+// 从「const/let/var VAR = { ... }」提取方法
+function methodsFromVarDef(src, varName) {
+  const defRe = new RegExp('(?:const|let|var)\\s+' + varName.replace(/[$]/g, '\\$') + '\\s*=\\s*\\{');
+  const dm = defRe.exec(src);
+  if (!dm) return [];
+  return methodsInBrace(src, dm.index + dm[0].length - 1);
+}
+
+function extractPageMethods(src) {
+  const idx = src.search(/\bPage\(/);
+  if (idx < 0) return [];
+  let p = idx + 4;
+  while (p < src.length && (src[p] === ' ' || src[p] === '\n' || src[p] === '\t' || src[p] === '\r' || src[p] === '(')) p++;
+  const SKIP = { Extras: 1, enhance: 1, Page: 1, require: 1 };
+  let names = [];
+  if (src[p] === '{') {
+    // 直接 Page({ ... })：方法就在花括号内
+    names = names.concat(methodsInBrace(src, p));
+  } else {
+    // 形如 Page(Extras.enhance(PAGE, {...})) / Page(PAGE)：解出被传入的页面对象变量
+    const close = findMatchParen(src, idx + 4);
+    if (close > 0) {
+      const arg = src.slice(p, close);
+      const idRe = /[A-Za-z_$][\w$]*/g;
+      let m;
+      while ((m = idRe.exec(arg))) {
+        const v = m[0];
+        if (SKIP[v]) continue;
+        const got = methodsFromVarDef(src, v);
+        if (got.length) { names = names.concat(got); break; }
+      }
+    }
+  }
+  // page-extras 的 enhance() 会向每个增强页注入这些通用方法
+  ['goHome', 'fillDemoExample', 'onShareAppMessage', 'onShareTimeline'].forEach(function (n) {
+    if (names.indexOf(n) < 0) names.push(n);
+  });
   return names;
 }
 
@@ -144,7 +191,11 @@ function main() {
       const api = m[1], raw = m[2], url = raw.split('?')[0];
       const line = src.slice(0, m.index).split('\n').length;
       navAll.push({ url: url });
-      if (url.charAt(0) !== '/') { navIssues.push({ lvl: '阻断', rel: rel, line: line, msg: '非绝对路径导航：' + api + "('" + raw + "')" }); continue; }
+      if (url.charAt(0) !== '/') {
+        // switchTo 可能是 Store.switchTo 这类非页面操作（如切当前项目），非页面跳转，跳过
+        if (api === 'switchTo') continue;
+        navIssues.push({ lvl: '阻断', rel: rel, line: line, msg: '非绝对路径导航：' + api + "('" + raw + "')" }); continue;
+      }
       if (!PAGE_SET[url]) { navIssues.push({ lvl: '阻断', rel: rel, line: line, msg: '目标页面不存在：' + api + "('" + url + "')" }); continue; }
       const isTab = !!TAB_SET[url];
       const useTabApi = (api === 'switchTab' || api === 'switchTo');
@@ -195,6 +246,16 @@ function main() {
     const src = fs.readFileSync(f, 'utf8');
     let m; LIT_RE.lastIndex = 0;
     while ((m = LIT_RE.exec(src))) NAV_TARGET[m[1]] = true;
+  });
+  // wxml 内的 <navigator url="..."> 也是静态入口（此前未识别，会误报孤儿页）
+  const NAV_WXML = /<navigator\b[^>]*?\burl\s*=\s*["']([^"']+)["']/g;
+  WXML.forEach(function (w) {
+    const src = fs.readFileSync(w, 'utf8');
+    let m; NAV_WXML.lastIndex = 0;
+    while ((m = NAV_WXML.exec(src))) {
+      const u = m[1].split('?')[0];
+      if (u.charAt(0) === '/') NAV_TARGET[u] = true;
+    }
   });
   const orphans = PAGES.filter(function (p) { const u = '/' + p; return !NAV_TARGET[u] && !TAB_SET[u]; });
 
