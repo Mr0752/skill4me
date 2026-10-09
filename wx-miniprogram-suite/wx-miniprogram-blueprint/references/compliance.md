@@ -14,7 +14,7 @@
 
 ## 合规三件套位置约定
 - **隐私政策 / 用户协议**：独立静态页（`packageA/pages/privacy`、`packageA/pages/terms`），放分包避免占主包体积。
-- **关于我们**：不要独立页（双份维护会文案漂移）——做成「我的」页底部区块（`assets/about-block.wxml`）。
+- **关于我们**：不要独立页（双份维护会文案漂移）——做成「我的」页底部区块（`assets/about-block.md`（使用时复制其 WXML 代码块为 `.wxml`））。
 
 ## 参数化占位表（模板里用 `{{...}}`，js 从 env.js setData）
 | 占位 | 含义 | 两个参考项目现状 |

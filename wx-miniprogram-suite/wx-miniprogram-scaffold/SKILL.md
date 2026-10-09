@@ -35,7 +35,7 @@ Ask the user (batch in one message, multiSelect where useful):
 
 ### Phase 2 — Compliance trio (from wx-miniprogram-blueprint)
 - Copy `assets/env.js` → `utils/env.js`; fill the `{{...}}` placeholders. **LEGAL_ENTITY (主体名称) is mandatory and must match the filing entity exactly.** Do NOT require ICP_NO — the mini-program filing number is auto-displayed by WeChat on the "更多资料页"; developers never manually fill or display it (unlike website ICP filing). CloudBase has no separate filing number for you to fill.
-- Copy `privacy-policy.wxml`, `user-agreement.wxml`, `about-block.wxml`; wire into `app.json` pages + "我的" page bottom block (do NOT make an independent about page).
+- Open `privacy-policy.md`, `user-agreement.md`, `about-block.md` in `wx-miniprogram-blueprint`; copy each WXML code-block contents and save as `.wxml` files; wire into `app.json` pages + "我的" page bottom block (do NOT make an independent about page).
 - Add `components/privacy-popup` using official `wx.requirePrivacyAuthorize` — **never register `onNeedPrivacyAuthorization`** (real-device popup clash).
 
 ### Phase 3 — Cloud-call & storage (from blueprint)

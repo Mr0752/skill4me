@@ -1,3 +1,6 @@
+> 本文件保存用户协议页面的 WXML 模板源码。使用时将下方代码块内容复制，并重命名为 `terms.wxml`（通常位于 `packageA/pages/terms/terms.wxml`）。
+
+```wxml
 <!-- packageA/pages/terms/terms.wxml —— 用户协议模板（参数化） -->
 <!-- js 里从 utils/env.js 取：appName/contactEmail/legalEntity/jurisdiction/policyDate/version -->
 <view class="doc">
@@ -25,3 +28,4 @@
 
   <view class="footer">Copyright © {{policyDate}} {{legalEntity}}. All Rights Reserved.</view>
 </view>
+```

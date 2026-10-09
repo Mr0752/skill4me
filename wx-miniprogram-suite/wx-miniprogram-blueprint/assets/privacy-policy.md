@@ -1,3 +1,6 @@
+> 本文件保存隐私政策页面的 WXML 模板源码。使用时将下方代码块内容复制，并重命名为 `privacy.wxml`（通常位于 `packageA/pages/privacy/privacy.wxml`）。
+
+```wxml
 <!-- packageA/pages/privacy/privacy.wxml —— 隐私政策模板（参数化） -->
 <!-- js 里从 utils/env.js 取下列字段 setData：appName/contactEmail/legalEntity/icpNo/jurisdiction/policyDate -->
 <view class="doc">
@@ -20,3 +23,4 @@
 
   <view class="footer">主体：{{legalEntity}}　管辖：{{jurisdiction}}</view>
 </view>
+```
