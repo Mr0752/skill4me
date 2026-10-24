@@ -21,8 +21,8 @@ Generate real `.docx` files entirely in JS (no npm package, no Office) by assemb
 - Want to avoid a heavy npm dependency or server-side Office.
 
 ## How to use
-1. Copy `assets/zip.js` → project `utils/zip.js` (minimal store-mode zip packer, no dependency).
-2. Copy `assets/docx.js` → project `utils/docx.js` (requires `./zip.js`).
+1. Copy `templates/zip.js` → project `utils/zip.js` (minimal store-mode zip packer, no dependency).
+2. Copy `templates/docx.js` → project `utils/docx.js` (requires `./zip.js`).
 3. Build a document:
    ```js
    const docx = require('./docx');

@@ -3,8 +3,9 @@
 """
 WorkBuddy 开放平台上传前门禁。
 
-平台的文件质量检测会把 SKILL.md 里出现的 references/ scripts/ templates/ assets/
+平台的文件质量检测会把 SKILL.md 里出现的 references/ scripts/ templates/
 路径当作「必须随包提供的资源」，包内没有就驳回（内置文件缺失）。本脚本复刻该检查：
+（assets/ 已按官方「技能基础结构」文档弃用，PATH_RE 仍保留 assets 扫描以捕获残留引用。）
 
   1. frontmatter 用 PyYAML 真实解析，校验必填字段、禁止残留 SkillHub 字段
   2. 抽取 SKILL.md 与 references/*.md 中所有包内路径，逐个确认文件存在
@@ -156,7 +157,7 @@ for s in SKILLS:
         # 反向测试：确认正则真能抓到「缺文件」与「外部技能引用」
         assert PATH_RE.search('see `references/not-exist.md` ok'), 'PATH_RE 未命中 references/'
         assert PATH_RE.search('run `node scripts/audit-redlines.js <root>`'), 'PATH_RE 未命中 scripts/'
-        assert PATH_RE.search('copy `assets/vp.js` into'), 'PATH_RE 未命中 assets/'
+        assert PATH_RE.search('copy `templates/vp.js` into'), 'PATH_RE 未命中 templates/'
         assert SKILL_REF_RE.search('is the `miniprogram-redline-audit` skill'), 'SKILL_REF_RE 未命中 X skill'
         assert not SKILL_REF_RE.search('走 `miniprogram-docx` 导出'), 'SKILL_REF_RE 误伤普通引用'
         # 端到端反向测试：造一个引用不存在文件的 skill，必须报错

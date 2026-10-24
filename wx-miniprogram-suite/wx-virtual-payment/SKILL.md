@@ -26,10 +26,10 @@ The flow is: client calls cloud function `xpay_order` → server signs (paySig +
 
 ## How to use
 1. Read `references/signing.md` for the exact `paySig` / `signature` algorithms and required env vars.
-2. Copy `assets/vp.js` into the ordering cloud function. It needs env vars `VP_OFFER_ID`, `VP_APPKEY`, `VP_ENV` (0 prod / 1 sandbox), `WX_APPID`, `WX_APPSECRET`.
+2. Copy `templates/vp.js` into the ordering cloud function. It needs env vars `VP_OFFER_ID`, `VP_APPKEY`, `VP_ENV` (0 prod / 1 sandbox), `WX_APPID`, `WX_APPSECRET`.
 3. Implement the `xpay_order` action: persist a pending order keyed by `outTradeNo`, then call `vp.buildOrderParams({ openid, productId, code, outTradeNo, envVersion })`. The `code` is the client's fresh `wx.login()` result.
-4. Copy `assets/payNotify.js` as the delivery-callback cloud function (configure it in MP "虚拟支付 → 发货回调"). It looks up the pending order by `outTradeNo`, grants entitlement, and marks delivered (idempotent — WeChat retries up to 15×).
-5. Copy `assets/client_purchase.js` into the client as the `purchase(sku)` helper: it does `wx.login()` for the code, calls the order cloud function, then `wx.requestVirtualPayment(params)`.
+4. Copy `templates/payNotify.js` as the delivery-callback cloud function (configure it in MP "虚拟支付 → 发货回调"). It looks up the pending order by `outTradeNo`, grants entitlement, and marks delivered (idempotent — WeChat retries up to 15×).
+5. Copy `templates/client_purchase.js` into the client as the `purchase(sku)` helper: it does `wx.login()` for the code, calls the order cloud function, then `wx.requestVirtualPayment(params)`.
 6. Map each MP-configured `productId` to your own entitlement (plan / item count / seats) inside the grant step.
 
 ## Key pitfalls (must tell the user)

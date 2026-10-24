@@ -3,9 +3,14 @@
  * 把共用资产/脚本同步进「自包含」包（scaffold / blueprint）。
  *
  * 背景：WorkBuddy 开放平台的文件质量检测会把 SKILL.md 里出现的
- * references/ scripts/ templates/ assets/ 路径当作「必须随包提供的资源」，
+ * references/ scripts/ templates/ 路径当作「必须随包提供的资源」，
  * 一旦包内没有就驳回（内置文件缺失）。因此每个 zip 必须自包含，
  * 不能靠「运行时再加载另一个 skill 的文件」。
+ *
+ * 目录约定（对齐官方「技能基础结构」文档，只用以下三类子目录）：
+ *   references/ —— 参考资料（AI 读取的上下文 / 投递进工程的 WXML 模板文）
+ *   scripts/    —— 可执行脚本（AI 通过 Bash 调用）
+ *   templates/  —— 可复用的模板脚本 / 配置文件（投递进用户工程的代码文件）
  *
  * 源头（source of truth）保持不变，在本脚本里声明同步关系；
  * 打包前先跑一次，保证副本不漂移。
@@ -24,23 +29,23 @@ const CHECK_ONLY = process.argv.includes('--check');
 // src: 相对 ROOT 的源文件；dest: 相对 ROOT 的目标文件
 const MAP = [
   // scaffold: 合规三件套 + 云调用封装（源 = blueprint）
-  ['wx-miniprogram-blueprint/assets/env.js', 'wx-miniprogram-scaffold/assets/env.js'],
-  ['wx-miniprogram-blueprint/assets/cloud.js', 'wx-miniprogram-scaffold/assets/cloud.js'],
-  ['wx-miniprogram-blueprint/assets/privacy-policy.md', 'wx-miniprogram-scaffold/assets/privacy-policy.md'],
-  ['wx-miniprogram-blueprint/assets/user-agreement.md', 'wx-miniprogram-scaffold/assets/user-agreement.md'],
-  ['wx-miniprogram-blueprint/assets/about-block.md', 'wx-miniprogram-scaffold/assets/about-block.md'],
-  ['wx-miniprogram-blueprint/assets/tools/syntax-check.js', 'wx-miniprogram-scaffold/assets/tools/syntax-check.js'],
+  ['wx-miniprogram-blueprint/templates/env.js', 'wx-miniprogram-scaffold/templates/env.js'],
+  ['wx-miniprogram-blueprint/templates/cloud.js', 'wx-miniprogram-scaffold/templates/cloud.js'],
+  ['wx-miniprogram-blueprint/references/privacy-policy.md', 'wx-miniprogram-scaffold/references/privacy-policy.md'],
+  ['wx-miniprogram-blueprint/references/user-agreement.md', 'wx-miniprogram-scaffold/references/user-agreement.md'],
+  ['wx-miniprogram-blueprint/references/about-block.md', 'wx-miniprogram-scaffold/references/about-block.md'],
+  ['wx-miniprogram-blueprint/scripts/syntax-check.js', 'wx-miniprogram-scaffold/scripts/syntax-check.js'],
   // scaffold: 虚拟支付（源 = wx-virtual-payment）
-  ['wx-virtual-payment/assets/vp.js', 'wx-miniprogram-scaffold/assets/vp.js'],
-  ['wx-virtual-payment/assets/payNotify.js', 'wx-miniprogram-scaffold/assets/payNotify.js'],
-  ['wx-virtual-payment/assets/client_purchase.js', 'wx-miniprogram-scaffold/assets/client_purchase.js'],
+  ['wx-virtual-payment/templates/vp.js', 'wx-miniprogram-scaffold/templates/vp.js'],
+  ['wx-virtual-payment/templates/payNotify.js', 'wx-miniprogram-scaffold/templates/payNotify.js'],
+  ['wx-virtual-payment/templates/client_purchase.js', 'wx-miniprogram-scaffold/templates/client_purchase.js'],
   ['wx-virtual-payment/references/signing.md', 'wx-miniprogram-scaffold/references/signing.md'],
   // scaffold: DOCX 导出（源 = miniprogram-docx）
-  ['miniprogram-docx/assets/zip.js', 'wx-miniprogram-scaffold/assets/zip.js'],
-  ['miniprogram-docx/assets/docx.js', 'wx-miniprogram-scaffold/assets/docx.js'],
+  ['miniprogram-docx/templates/zip.js', 'wx-miniprogram-scaffold/templates/zip.js'],
+  ['miniprogram-docx/templates/docx.js', 'wx-miniprogram-scaffold/templates/docx.js'],
   ['miniprogram-docx/references/blocks.md', 'wx-miniprogram-scaffold/references/blocks.md'],
   // scaffold: AI 文本生成（源 = cloudbase-ai-textgen）
-  ['cloudbase-ai-textgen/assets/ai_textgen.js', 'wx-miniprogram-scaffold/assets/ai_textgen.js'],
+  ['cloudbase-ai-textgen/templates/ai_textgen.js', 'wx-miniprogram-scaffold/templates/ai_textgen.js'],
   ['cloudbase-ai-textgen/references/model-api.md', 'wx-miniprogram-scaffold/references/model-api.md'],
   // scaffold: 提审清单（源 = blueprint，含虚拟支付审核坑）
   ['wx-miniprogram-blueprint/references/pitfalls.md', 'wx-miniprogram-scaffold/references/pitfalls.md'],
@@ -52,9 +57,9 @@ const MAP = [
   ['miniprogram-redline-audit/scripts/audit-redlines.js', 'wx-miniprogram-scaffold/scripts/audit-redlines.js'],
   ['miniprogram-redline-audit/scripts/audit-paths.js', 'wx-miniprogram-scaffold/scripts/audit-paths.js'],
   ['miniprogram-redline-audit/scripts/audit-closure.js', 'wx-miniprogram-scaffold/scripts/audit-closure.js'],
-  ['miniprogram-redline-audit/scripts/audit-redlines.js', 'wx-miniprogram-blueprint/assets/tools/audit-redlines.js'],
-  ['miniprogram-redline-audit/scripts/audit-paths.js', 'wx-miniprogram-blueprint/assets/tools/audit-paths.js'],
-  ['miniprogram-redline-audit/scripts/audit-closure.js', 'wx-miniprogram-blueprint/assets/tools/audit-closure.js'],
+  ['miniprogram-redline-audit/scripts/audit-redlines.js', 'wx-miniprogram-blueprint/scripts/audit-redlines.js'],
+  ['miniprogram-redline-audit/scripts/audit-paths.js', 'wx-miniprogram-blueprint/scripts/audit-paths.js'],
+  ['miniprogram-redline-audit/scripts/audit-closure.js', 'wx-miniprogram-blueprint/scripts/audit-closure.js'],
 ];
 
 function readIfExists(p) {

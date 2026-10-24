@@ -91,7 +91,7 @@ SkillHub 的发布单位是**单个 skill**（一个 Slug + 一个显示名称�
 
 ### 内置文件缺失（第二类驳回原因）
 
-平台的文件质量检测会把 SKILL.md 里出现的 `references/…`、`scripts/…`、`templates/…`、`assets/…` 路径当作**必须随包提供**的资源，包内找不到就直接驳回：
+平台的文件质量检测会把 SKILL.md 里出现的 `references/…`、`scripts/…`、`templates/…` 路径当作**必须随包提供**的资源，包内找不到就直接驳回（官方「技能基础结构」只认这三类子目录 + SKILL.md，本套件不另用 `assets/`，投递进工程的代码统一放 `templates/`）：
 
 > 资产包缺少必需资源 1 项：文件「references/pitfalls.md」（SKILL.md 引用）
 > 评级结论：内置文件缺失

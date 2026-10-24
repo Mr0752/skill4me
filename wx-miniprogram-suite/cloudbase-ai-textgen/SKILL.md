@@ -23,7 +23,7 @@ Call a large model (e.g. 混元 hy3) from a mini-program cloud function via `@cl
 - CloudBase environment exists; **model switch enabled** in console ("接入大模型" / AI 功能开关). Without it, calls fail.
 - Cloud-function dependencies: `@cloudbase/node-sdk >= 3.18.3`, `@cloudbase/ai >= 2.30.0` (`npm install`).
 
-## How to use (see assets/ai_textgen.js + references/model-api.md)
+## How to use (see templates/ai_textgen.js + references/model-api.md)
 ```js
 const tcb = require('@cloudbase/node-sdk');
 const app = tcb.init({ env: process.env.CLOUD_ENV_ID || '你的环境ID', timeout: 60000 });

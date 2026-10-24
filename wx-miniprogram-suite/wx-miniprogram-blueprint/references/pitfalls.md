@@ -1,7 +1,7 @@
 # 避坑红线与提审清单（来自两个已上架项目的踩坑记录）
 
 ## 一、真机兼容（最高频、模拟器测不出）
-- 客户端 JS **禁用** `?.` `??` `||=` `&&=`（可选链/空值合并/逻辑赋值）。真机编译通道不转换 → 真机 SyntaxError，模拟器和 lint 都查不出。用 `assets/tools/syntax-check.js` 做上架前闸门。
+- 客户端 JS **禁用** `?.` `??` `||=` `&&=`（可选链/空值合并/逻辑赋值）。真机编译通道不转换 → 真机 SyntaxError，模拟器和 lint 都查不出。用 `scripts/syntax-check.js` 做上架前闸门。
 - 模拟器判定用 `sys.brand === 'devtools'`，**不能**用 `envVersion === 'develop'`（真机远程调试也返回 `develop`）。
 
 ## 二、导航与组件
@@ -12,7 +12,7 @@
 
 ## 三、存储与云调用
 - Storage key 统一走封装前缀，禁手写散落前缀（如 `aa_`）。
-- 所有 `wx.cloud.callFunction` 走 `assets/cloud.js` 封装（超时+静默失败+连续失败降级本地）；箭头函数写法保证 `this` 正确。
+- 所有 `wx.cloud.callFunction` 走 `templates/cloud.js` 封装（超时+静默失败+连续失败降级本地）；箭头函数写法保证 `this` 正确。
 - db 集合操作只在云函数侧（`wx-server-sdk`），端上不直连；文件/图片上传走云函数处理，不走端上 `uploadFile`（规避端上传兼容坑）。
 
 ## 四、文案 = 承诺（审核红线）

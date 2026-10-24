@@ -22,15 +22,15 @@ A reusable starter kit distilled from three cloud-development mini programs that
 - Pre-submission review / red-line / 真机兼容 / 提审清单 questions.
 
 ## How to use
-1. Copy `assets/env.js` → project `utils/env.js`; fill every `{{...}}` placeholder. All compliance pages and copyright headers read from it. **Mandatory: add `ICP_NO` and `LEGAL_ENTITY`** — both shipped reference apps were missing these (compliance gap).
-2. Open `assets/privacy-policy.md`, `assets/user-agreement.md`, `assets/about-block.md`; copy the WXML code block contents and save them as `.wxml` files in `packageA/pages/` (or main `pages/`). Wire them into `app.json` `pages`, and place the about block at the bottom of the "我的" page. Replace `{{...}}`.
+1. Copy `templates/env.js` → project `utils/env.js`; fill every `{{...}}` placeholder. All compliance pages and copyright headers read from it. **Mandatory: add `ICP_NO` and `LEGAL_ENTITY`** — both shipped reference apps were missing these (compliance gap).
+2. Open `references/privacy-policy.md`, `references/user-agreement.md`, `references/about-block.md`; copy the WXML code block contents and save them as `.wxml` files in `packageA/pages/` (or main `pages/`). Wire them into `app.json` `pages`, and place the about block at the bottom of the "我的" page. Replace `{{...}}`.
 3. Set app.json switches (see `references/compliance.md`): `__usePrivacyCheck__: true`, `darkmode`, `lazyCodeLoading: requiredComponents`. Add `components/privacy-popup` using the official `wx.requirePrivacyAuthorize` — **do NOT register `onNeedPrivacyAuthorization`** (popup clash on real device).
-4. Copy `assets/cloud.js` as the cloud-call wrapper (lazy init + timeout + silent fail + auto-degrade to local on repeated failure). Route ALL `wx.cloud.callFunction` through it. Keep db writes server-side only; upload files via cloud functions, not the client.
+4. Copy `templates/cloud.js` as the cloud-call wrapper (lazy init + timeout + silent fail + auto-degrade to local on repeated failure). Route ALL `wx.cloud.callFunction` through it. Keep db writes server-side only; upload files via cloud functions, not the client.
 5. Before first submission, run the bundled checks (zero-dep Node, paths relative to this package):
-   - `node assets/tools/syntax-check.js <miniprogramRoot>` — 轻量真机兼容闸门（检测 `?.` `??` `||=` `&&=`）。
-   - `node assets/tools/audit-redlines.js <miniprogramRoot>` — 全量红线审计（WXML `{{}}` 陷阱、tabBar 跳法、手写 storage key、可选链等），硬性项必须清零。
-   - `node assets/tools/audit-paths.js <miniprogramRoot>` — 页面四件套完整性 + `app.json` 注册校验。
-   - `node assets/tools/audit-closure.js <miniprogramRoot>` — 四层交互闭环（导航/事件/数据/孤儿页）。
+   - `node scripts/syntax-check.js <miniprogramRoot>` — 轻量真机兼容闸门（检测 `?.` `??` `||=` `&&=`）。
+   - `node scripts/audit-redlines.js <miniprogramRoot>` — 全量红线审计（WXML `{{}}` 陷阱、tabBar 跳法、手写 storage key、可选链等），硬性项必须清零。
+   - `node scripts/audit-paths.js <miniprogramRoot>` — 页面四件套完整性 + `app.json` 注册校验。
+   - `node scripts/audit-closure.js <miniprogramRoot>` — 四层交互闭环（导航/事件/数据/孤儿页）。
    Then follow `references/pitfalls.md` review checklist.
 6. For monetization (enterprise/个体户 subject with a supporting category only), follow the virtual-payment rules in `references/pitfalls.md` section 五: signature/delivery samples, three-price consistency and `DEMO_MODE` handling.
 
