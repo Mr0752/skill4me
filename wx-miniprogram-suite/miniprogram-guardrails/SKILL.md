@@ -45,6 +45,10 @@ Provide universally-applicable red lines and pitfall guardrails for WeChat mini-
 
 ### 4. Cloud / cloud functions (most expensive, most hidden)
 - **No blind fixed-interval polling.** Never `setInterval(15s)` that unconditionally `pull`s. Use recursive `setTimeout` with **idle backoff**: base 60s; if N consecutive rounds (≈10) produce no local change → back off to 5 min. Wake on local write and on `onShow` (immediate pull).
+- **Two-layer defense against call storms (client + server).** A TTL cache alone is **NOT** enough: a single page calling with `force` on every `onShow` can still hammer the cloud. Measured incident: one function's `state` action got **20,353 calls in 5h** (≈1/s), burning **2,327 DB resource points, 100k log lines, 1.89GB log index traffic**. Always implement BOTH layers:
+  1. **Client module-level**: in-flight de-dup (all callers share one Promise) + **hard minimum-gap throttle** that blocks even `force` calls.
+  2. **Server short in-container cache** (e.g. 3s TTL) as the last gate — and **delete that cache on every balance-changing action** (consume / redeem / grant) so a stale balance is never served.
+- **Content security needs a working channel, not just code.** `msgSecCheck` can fail infrastructure-side (`-501001` = broken cloud-call token chain). Keep a **deterministic local blocklist as the first line**, and provide an **HTTPS-direct path (AppSecret)** to bypass the broken chain. Log failures; **never** treat "check failed" as "content passed".
 - **Free quota reality:** only **调用次数 (20万/月)** can blow out; capacity/storage/traffic ≈0. Compute quota math at design time (interval × 24h × users).
 - **Sanitize all egress at one shared出口**: strip empty field names, `undefined`, empty strings. Applies to push, merge, and backup export.
 - **Treat cloud-returned values as untrusted:** wrap scalar reads in `Number(x)` + `isFinite` with safe default.

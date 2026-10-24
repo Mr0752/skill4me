@@ -1,0 +1,95 @@
+---
+slug: mr0752-wx-mp-publish
+displayName: 小程序上架与提审指引
+version: 1.0.0
+summary: 从代码体检到控制台配置、虚拟支付、上传提审、驳回应对的端到端分步操作单，小白可直接跟随。
+license: MIT
+name: wx-miniprogram-publish
+description: WeChat mini-program launch & review-submission SOP — a beginner-friendly, step-by-step operational checklist covering the full path from local code preflight, MP console account setup, service-content declaration (privacy / UCG), virtual-payment configuration (sandbox → production), code upload, review submission, to post-submission tracking and rejection handling. Use this skill when the user says "上架", "提审", "提交审核", "怎么发布小程序", "审核被拒", "虚拟支付怎么配", or is preparing any WeChat mini program for first release or an update review. It encodes the order-critical steps (virtual payment requires the mini program to be published FIRST) and the high-frequency rejection causes (category / privacy declaration / payment / copywriting).
+---
+
+# 小程序上架与提审指引（可直接跟随）
+
+## Purpose
+把"上架 / 提审"这件事从「凭经验摸索 + 被驳回后救火」变成**照单执行的 SOP**。每一步都写明：**去哪儿 → 点什么 → 填什么 → 看到什么算这一步过了 → 这一步最容易翻车的点**。
+
+## When to use
+- 用户说 上架 / 提审 / 提交审核 / 发布小程序 / 审核被拒 / 虚拟支付怎么配。
+- 首次发布，或任何一次版本更新后的提审。
+- 需要向他人（含非技术）交接发布流程时。
+
+## How to use
+1. **严格按顺序走**：阶段 2（服务内容声明）和阶段 4（虚拟支付）**有依赖关系**，跳过顺序必然返工。
+2. 每个阶段末尾有「✅ 本阶段通过标准」，**没通过不要往下走**。
+3. 涉及本项目真实值的地方已标出（如 OfferID `1450672748`、订单中心 path `pages/orders/orders`）；新项目请替换成自己的。
+4. 完整分步细节（含每个输入框填什么）加载 `references/launch-console-steps.md`。
+
+## 流程总览
+
+```
+阶段 0 出发前准备（代码体检 + 材料）
+   ↓
+阶段 1 账号设置（名称/头像/简介/类目/客服）
+   ↓
+阶段 2 服务内容声明 ⚠️ 驳回高发（隐私保护指引 + UCG 声明）
+   ↓
+阶段 3 开发设置（AppSecret / 域名 / 消息推送）
+   ↓
+阶段 4 虚拟支付 ⚠️ 顺序关键（先上架 → 再申请 → 沙箱 → 现网）
+   ↓
+阶段 5 上传代码 + 提交审核
+   ↓
+阶段 6 提审后跟踪 / 驳回应对
+```
+
+## 各阶段要点（详版见 references）
+
+### 阶段 0 · 出发前
+- 跑全套本地审计，**全绿才继续**（脚本清单见项目 `doc/新项目复用资产清单.md` 二 B 节）。
+- **退出码 0 ≠ 修好**：必须对比"扫描到的样本数"，否则会出现「文件被跳过」的假绿。
+
+### 阶段 1 · 账号设置
+- **小程序名称一年仅能改 2 次**，头像 2 次/年，简介 5 次/月 → 定稿前想清楚。
+- 服务类目必须与实际功能一致；涉及付费需类目支持。
+
+### 阶段 2 · 服务内容声明 ⚠️
+- **隐私保护指引**：声明的隐私接口必须 ⊇ 代码实际调用的；漏声明真机会报 `errno 112 api scope is not declared`。
+- **UCG 用户生成内容声明**：只要产品里有 AI 生成内容（如 draft 调 hy3 写方案/合同），**不声明提审必驳回**。
+- 存储期限不要留 0（填 365）；变更告知方式必填（填"弹窗提示"）；底部声明勾选后提交，状态须为「已更新」。
+
+### 阶段 3 · 开发设置
+- AppSecret 生成后写进**云函数环境变量**，不落代码库、不发聊天。
+- 用云开发 → 服务器域名可点「立即开通」免配；消息推送用「云函数托管」最省事。
+
+### 阶段 4 · 虚拟支付（顺序最关键）⚠️
+1. **必须先让小程序上架成功**，才能申请虚拟支付。
+2. 拿 OfferID，生成**沙箱 AppKey**（先测）与**现网 AppKey**（上线）。
+3. 云函数环境变量（本项目）：
+   - `entitlement`：`VP_OFFER_ID`、`VP_APPKEY`、`VP_ENV`、`WX_APPID`、`WX_APPSECRET`、`VP_CALLBACK_SECRET`
+   - `payNotify`：`VP_CALLBACK_SECRET`（**必须与 entitlement 同一把**，否则钱付了权益发不出）
+4. **道具配置**：道具 ID 必须与代码 `GOODS`/`PLANS` 的 `id` **逐字一致**。
+   - 漏建 = 用户点购买撞"未知的商品"死路。本项目曾「代码 13 个 ≠ 后台 11 个」，缺 `doc_ai_deliver`、`doc_witness`。
+   - 全部价格 ≥1 元（满足 iOS Apple 支付最低限制）。
+5. **发货推送**：模式选「云函数」，事件类型 `xpay_goods_deliver_notify`，云函数 `payNotify`。
+6. **沙箱全流程验证**：下单 → 签名 → 拉起支付 → 发货推送 → **查云端 `ent_users`/`xpay_orders` 状态为 `delivered`**（不靠界面感觉）。
+7. **切现网**：`VP_ENV=0` + 换现网 AppKey → 道具「批量发布」→ 真机再走一单小额验证。
+8. ⚠️ **环境变量必须用 `tcb fn deploy` 写入**，不要用 DevTools CLI（会静默跳过 `envVariables`）。
+
+### 阶段 5 · 上传与提审
+- 开发者工具「上传」→ 填版本号与备注（写清本次更新点）。
+- MP 后台「版本管理」→ 提交审核 → 填测试信息。
+- **无登录体系的项目：测试账号/密码留空**，在备注说明即可（填了反而让审核员登不上）。
+
+### 阶段 6 · 提审后
+- 驳回高发四项：**类目不符 / 隐私声明缺失 / 支付绕开虚拟支付 / 文案承诺过度**。
+- 应对：按「拒绝原因」原文逐条改，**改完重跑阶段 0 的全套脚本**再提，别只改表面。
+
+## 关键红线（背下来）
+- 跳 tabBar 页必须用 `wx.switchTab`，`navigateTo` 静默失败。
+- 客户 JS 禁用 `?. ?? ||= &&=`（真机不转译 → 白屏）。
+- 云开发**绝不盲目定时轮询**；端上节流 + 云端短缓存两层防护。
+- **文案 = 承诺**：没有的能力不写（本地模板 ≠ 云端 AI；无 PDF 不写"导出 PDF"）。
+
+## 详细参考
+全流程每一步（去哪儿点、填什么、成功标志、易翻车点）见：
+`references/launch-console-steps.md`

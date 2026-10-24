@@ -10,13 +10,15 @@ $list = @(
   'miniprogram-redline-audit',
   'miniprogram-guardrails',
   'miniprogram-docx',
-  'cloudbase-ai-textgen'
+  'cloudbase-ai-textgen',
+  'doc-scan-ocr',
+  'wx-miniprogram-publish'
 )
 
 foreach ($s in $list) {
   $p = Join-Path $base $s
   Write-Host "==> Publishing $s"
-  skillhub publish $p --changelog "首次发布：微信小程序开发全家桶 v1.0.0"
+  skillhub publish $p --changelog "微信小程序开发全家桶 v1.1.0（新增 doc-scan-ocr、wx-miniprogram-publish）"
   if ($LASTEXITCODE -ne 0) {
     Write-Warning "发布 $s 失败（见上），已停止。请先 skillhub publish $s --dry-run 排查。"
     break

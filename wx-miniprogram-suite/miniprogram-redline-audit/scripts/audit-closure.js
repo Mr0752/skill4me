@@ -170,6 +170,58 @@ function extractPageMethods(src) {
   return names;
 }
 
+/**
+ * 在对象字面量（openIdx 指向 '{'）的**顶层**查找 key: { 中 '{' 的位置。
+ * 用 sticky 正则保证只从当前下标开始匹配，避免命中 'xxxmethods' 这类后缀。
+ */
+function findTopKeyBrace(src, openIdx, key) {
+  // depth 从 1 起算：openIdx 自身的 '{' 记为第 1 层，
+  // 这样成员对象（properties / data …）的闭合 '}' 只会回到 1，
+  // 而对象**自身**的闭合 '}' 才会回到 0 —— 只有后者才该终止扫描。
+  // （若从 0 起算，第一个成员对象的 '}' 就会误判为结束，methods 永远扫不到。）
+  var depth = 1, inStr = null;
+  var re = new RegExp(key + '\\s*:\\s*\\{', 'y');
+  for (var k = openIdx + 1; k < src.length; k++) {
+    var c = src[k];
+    if (inStr) {
+      if (c === '\\') { k++; continue; }
+      if (c === inStr) inStr = null;
+      continue;
+    }
+    if (c === '"' || c === "'" || c === '`') { inStr = c; continue; }
+    if (c === '/' && src[k + 1] === '/') { var nl = src.indexOf('\n', k); k = nl < 0 ? src.length : nl; continue; }
+    if (c === '/' && src[k + 1] === '*') { var nl2 = src.indexOf('*/', k); k = nl2 < 0 ? src.length : nl2 + 1; continue; }
+    if (c === '{') { depth++; continue; }
+    if (c === '}') { depth--; if (depth === 0) break; continue; }
+    // depth === 1 表示位于该对象字面量的顶层成员位置
+    if (depth === 1 && c === key.charAt(0)) {
+      var prev = src[k - 1];
+      if (prev === '{' || prev === ',' || /\s/.test(prev)) {
+        re.lastIndex = k;
+        var mm = re.exec(src);
+        if (mm) return k + mm[0].length - 1;
+      }
+    }
+  }
+  return -1;
+}
+
+/**
+ * 从 Component({ ... methods: { ... } }) 提取方法名。
+ * 为什么需要它：原提取器只认 Page({...}) / Page(Extras.enhance(...))，
+ * 自定义组件的事件处理器都挂在 methods 上，导致组件里每个 bindtap 都被误报"方法不存在"。
+ */
+function extractComponentMethods(src) {
+  var idx = src.search(/\bComponent\(/);
+  if (idx < 0) return [];
+  var p = idx + 9; // 'Component'.length
+  while (p < src.length && /[\s(\n\r\t]/.test(src[p])) p++;
+  if (src[p] !== '{') return [];
+  var mIdx = findTopKeyBrace(src, p, 'methods');
+  if (mIdx < 0) return [];
+  return methodsInBrace(src, mIdx);
+}
+
 function normKey(k) {
   return CFG.KEY_PREFIX ? k.replace(new RegExp('^' + CFG.KEY_PREFIX), '') : k;
 }
@@ -212,8 +264,11 @@ function main() {
     const rel = path.relative(ROOT, w).replace(/\\/g, '/');
     const jsPath = w.replace(/\.wxml$/, '.js');
     if (!fs.existsSync(jsPath)) return;
-    const methods = extractPageMethods(fs.readFileSync(jsPath, 'utf8'));
-    if (!methods) return;
+    const jsSrc = fs.readFileSync(jsPath, 'utf8');
+    // 页面走 Page({...})，自定义组件走 Component({ methods:{...} })——两处的方法都要算，
+    // 否则组件里的事件会被整片误报。
+    const methods = extractPageMethods(jsSrc).concat(extractComponentMethods(jsSrc));
+    if (!methods.length) return;
     const ms = {}; methods.forEach(function (n) { ms[n] = true; });
     const wsrc = fs.readFileSync(w, 'utf8');
     let m; EVT_RE.lastIndex = 0;

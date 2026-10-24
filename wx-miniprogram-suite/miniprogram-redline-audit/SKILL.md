@@ -1,7 +1,7 @@
 ---
 slug: mr0752-wx-mp-redline-audit
 displayName: 小程序红线自动审计
-version: 1.0.0
+version: 1.2.0
 summary: 零依赖扫描微信小程序红线（真机语法/WXML/tabBar/存储/四件套/交互闭环），提审前体检。
 license: MIT
 name: miniprogram-redline-audit
@@ -77,17 +77,24 @@ $ node audit-redlines.js miniprogram
 
 主 `audit-redlines.js` 不覆盖「四件套完整性」与「四层交互闭环」，需用以下两个独立脚本补齐（`--help` 看用法，零依赖）：
 
-- `node scripts/audit-paths.js <根目录>` — 页面四件套完整性（js/json/wxml/wxss 齐全）+ `app.json` 注册校验；自动排除 `components/` 避免组件被误判为孤儿页面。
+- `node scripts/audit-paths.js <根目录> [--ignore=dir1,dir2]` — 页面四件套完整性（js/json/wxml/wxss 齐全）+ `app.json` 注册校验。
+  排除噪音的四级机制（避免备份/构建/模板片段被误报成孤儿页，导致闸门常年飘红）：
+  1. 内建忽略目录：`node_modules` / `miniprogram_npm` / `_lib` / `cloudfunctions` / `.git` / `dist` / `.codebuddy`
+  2. 项目根 `.redlineignore`：每行一条（`#` 注释），支持「目录名」「相对路径前缀」「`foo*` 通配」
+  3. 命令行 `--ignore=a,b,c`：与 `.redlineignore` 同语义，临时覆盖用
+  4. 片段自动识别：被其它 wxml 的 `<include src>` / `<import src>` 引用的 `.wxml` 是模板片段，不参与孤儿判定
+  另：`components/` 由 `usingComponents` 引入，本就无需在 `app.json` 注册，一律跳过。
 - `node scripts/audit-closure.js <根目录>` — 四层交互闭环：
   1. **导航闭环**：目标页存在、API 与页类型匹配（TabBar 页只用 switchTab）、路径为绝对路径；
-  2. **事件闭环**：每个 `bindXxx`/`catchXxx` 方法都在对应页面 JS 的 `Page()` 顶层方法中存在；
+  2. **事件闭环**：每个 `bindXxx`/`catchXxx` 方法都能在对应 JS 中找到，同时支持
+     `Page({...})` / `Page(Extras.enhance(PAGE, {...}))` 与自定义组件的 `Component({ methods: {...} })`；
   3. **数据闭环**：Storage 写入键都有读取（死键 0），只读未写列出供人工确认（云端/外部注入）；
   4. **孤儿页**：每个页面都有入口（被某处 navigate 指向或在 TabBar）。
   - 业务强相关项（导航封装名、Storage 读写正则、键前缀）在脚本顶部 `CFG` 配置，按项目改，不改逻辑。若你的 Storage 封装自动加前缀（如 `'myapp_'`），设 `CFG.KEY_PREFIX='myapp_'` 即可消除数据闭环噪声。
 
 ## 文件索引
 - `scripts/audit-redlines.js` — 审计主程序（零依赖，扫描任意小程序目录，`--help` 看用法）。
-- `scripts/audit-paths.js` — 页面四件套完整性 + app.json 注册校验（排除 components 误报）。
+- `scripts/audit-paths.js` — 页面四件套完整性 + app.json 注册校验（四级排除机制，见上）。
 - `scripts/audit-closure.js` — 四层交互闭环（导航/事件/数据/孤儿页），业务项经顶部 CFG 配置。
 - `references/redlines.md` — 通用红线知识库（每条审计发现按 id 引用）。
 - `references/fix-examples.md` — 逐条修复前后代码对照（改哪条抄哪条）。

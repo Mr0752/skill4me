@@ -1,8 +1,8 @@
-# 微信小程序开发全家桶（wx-miniprogram-suite）
+# 微信小程序开发套件（wx-miniprogram-suite）
 
 一套经过 3 个已上架小程序（AA Expense Split Assistant、Merchant Assistant、Whole-Process Construction Assistant）验证、**参数化、可跨项目复用**的 CodeBuddy / SkillHub skills，覆盖「从零搭建 → 合规 → 云开发 → 虚拟支付 → 红线审计 → 提审上架」的完整链路。
 
-## 包含 7 个 skill
+## 包含 9 个 skill
 
 | 目录 | slug | 作用 |
 |---|---|---|
@@ -13,26 +13,28 @@
 | `miniprogram-guardrails` | `mr0752-wx-mp-guardrails` | 点击锁 / 存储封装 / 演示数据等护栏 |
 | `miniprogram-docx` | `mr0752-wx-mp-docx` | 纯前端 DOCX 导出（零依赖 OOXML） |
 | `cloudbase-ai-textgen` | `mr0752-wx-mp-cloudbase-ai-textgen` | 云开发 AI 文本生成 |
+| `doc-scan-ocr` | `mr0752-doc-scan-ocr` | 扫描件/图片 → 表格抽取（零安装 Windows OCR） |
+| `wx-miniprogram-publish` | `mr0752-wx-mp-publish` | 上架控制台 + 提审 SOP（小白分步指引） |
 
-**依赖关系**：`scaffold` 在运行时会按名字加载其余 6 个 skill，请一并安装，不要只装单个。
+**依赖关系**：`scaffold` 在运行时会按名字加载其余 skill，请一并安装，不要只装单个。
 
 ## 作为本地 skill 使用
 
-把本目录下 7 个子目录**整体复制**到 CodeBuddy 的 user-level skills 目录：
+把本目录下 9 个子目录**整体复制**到 CodeBuddy 的 user-level skills 目录：
 
 - macOS / Linux：`~/.codebuddy/skills/`
 - Windows：`C:/Users/<你的用户名>/.codebuddy/skills/`
 
 ## 发布到 SkillHub（整包）
 
-SkillHub 的发布单位是**单个 skill**（一个 Slug + 一个显示名称），因此"整包"在 SkillHub 上就是 7 个独立 skill 一起发布。已为你打好 7 个 zip：`zips/*.zip`。
+SkillHub 的发布单位是**单个 skill**（一个 Slug + 一个显示名称），因此"整包"在 SkillHub 上就是 9 个独立 skill 一起发布。已为你打好 9 个 zip：`zips/*.zip`。
 
 ### 方案 A：网页端上传（最简单，无需安装 CLI）
 
-1. 打开目录 `D:\GitHub\Skill\wx-miniprogram-suite\zips\`，里面有 7 个 zip：`wx-miniprogram-scaffold.zip`、`wx-miniprogram-blueprint.zip`、`wx-virtual-payment.zip`、`miniprogram-redline-audit.zip`、`miniprogram-guardrails.zip`、`miniprogram-docx.zip`、`cloudbase-ai-textgen.zip`。
+1. 打开目录 `D:\GitHub\Skill\wx-miniprogram-suite\zips\`，里面有 9 个 zip：`wx-miniprogram-scaffold.zip`、`wx-miniprogram-blueprint.zip`、`wx-virtual-payment.zip`、`miniprogram-redline-audit.zip`、`miniprogram-guardrails.zip`、`miniprogram-docx.zip`、`cloudbase-ai-textgen.zip`、`doc-scan-ocr.zip`、`wx-miniprogram-publish.zip`。
 2. 打开 SkillHub 发布页（「发布新技能」界面），逐个拖拽上传 zip。
 3. 每张上传页会自动读取 `SKILL.md` 里的 `slug` 和 `displayName`；你只需确认 Slug、显示名称，图标可选，点发布。
-4. 7 个全部上传完成，「我的 Skills」里即整套。
+4. 9 个全部上传完成，「我的 Skills」里即整套。
 
 ### 方案 B：CLI 批量（适合后续迭代更新）
 
@@ -54,15 +56,15 @@ SkillHub 的发布单位是**单个 skill**（一个 Slug + 一个显示名称�
 5. **（可选）逐个预检**：
    ```bash
    skillhub publish wx-miniprogram-scaffold --dry-run
-   # 其余 6 个同理
+   # 其余 8 个同理
    ```
-6. **一键发布**（在 `D:\GitHub\Skill\wx-miniprogram-suite` 下运行随附脚本，自动遍历 7 个）：
+6. **一键发布**（在 `D:\GitHub\Skill\wx-miniprogram-suite` 下运行随附脚本，自动遍历 9 个）：
    ```powershell
    powershell -ExecutionPolicy Bypass -File publish.ps1
    ```
    看到 `✓ Published: skillId=xxxxx status=pending_review` 即进入审核。
 
-> 已统一使用 `mr0752-wx-mp-*` 前缀降低冲突概率。若仍报 `409 slug 已被占用`，继续加长前缀即可。
+> 已统一使用 `mr0752-wx-mp-*` / `mr0752-*` 前缀降低冲突概率。若仍报 `409 slug 已被占用`，继续加长前缀即可。
 
 ## 合规声明
 

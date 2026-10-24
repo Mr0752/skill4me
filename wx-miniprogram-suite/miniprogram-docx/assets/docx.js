@@ -1,7 +1,7 @@
 // 纯前端 DOCX 生成器（OOXML = zip + xml），无需服务端 / 第三方库。
 // 云端（Node）与端上（小程序）通用：buildDocx 返回 ArrayBuffer；端上用 deliver() 写本地+打开，云函数侧改用 cloud.uploadFile 上传。
 // 依赖 ./zip.js（极简 ZIP 打包器，零依赖）。
-// 块类型：h / p / table / page / image（image 的 data 为 PNG/JPEG Buffer，可选 caption）
+// 块类型：h / p / table / page / image（image.data 支持 Buffer/Uint8Array/ArrayBuffer/base64 字符串或 data URI，自动识别 PNG/JPEG 并按比例缩放真实嵌入，可选 caption）
 const zip = require('./zip.js');
 
 const REL_NS = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
@@ -25,6 +25,51 @@ function clean(s) {
 // doc: { title, subtitle, blocks, header, footer }
 // block: { type:'h'|'p'|'table'|'page'|'image', text, rows, size, bold, color, align, data, caption }
 //   image: data = Buffer（PNG/JPEG 二进制），caption 可选图注
+// 将多种来源归一为「可按字节读取的缓冲区」：Node Buffer / Uint8Array / ArrayBuffer / base64 字符串 / data URI
+function u32(buf, off) {
+  if (typeof buf.readUInt32BE === 'function') return buf.readUInt32BE(off);
+  return ((buf[off] << 24) | (buf[off + 1] << 16) | (buf[off + 2] << 8) | buf[off + 3]) >>> 0;
+}
+function u16(buf, off) {
+  if (typeof buf.readUInt16BE === 'function') return buf.readUInt16BE(off);
+  return ((buf[off] << 8) | buf[off + 1]) >>> 0;
+}
+function toBuffer(data) {
+  if (!data) return null;
+  if (typeof Buffer !== 'undefined' && Buffer.isBuffer(data)) return data;
+  if (typeof data === 'object') {
+    if (data instanceof Uint8Array) return (typeof Buffer !== 'undefined') ? Buffer.from(data) : data;
+    if (typeof data.byteLength === 'number') {
+      const u8 = new Uint8Array(data);
+      return (typeof Buffer !== 'undefined') ? Buffer.from(u8) : u8;
+    }
+    return null;
+  }
+  if (typeof data === 'string') {
+    let s = data.trim();
+    if (s.indexOf('data:') === 0) {
+      const c = s.indexOf(',');
+      if (c >= 0) s = s.slice(c + 1);
+    }
+    s = s.replace(/[\r\n\t ]/g, '');
+    if (typeof Buffer !== 'undefined') {
+      try { return Buffer.from(s, 'base64'); } catch (e) {}
+    }
+    if (typeof wx !== 'undefined' && wx.base64ToArrayBuffer) {
+      try { return new Uint8Array(wx.base64ToArrayBuffer(s)); } catch (e) {}
+    }
+    if (typeof atob !== 'undefined') {
+      try {
+        const bin = atob(s);
+        const u8 = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+        return u8;
+      } catch (e) {}
+    }
+    return null;
+  }
+  return null;
+}
 function imageType(buf) {
   if (buf && buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4E) return { ext: 'png', ct: 'image/png' };
   if (buf && buf[0] === 0xFF && buf[1] === 0xD8) return { ext: 'jpeg', ct: 'image/jpeg' };
@@ -32,18 +77,18 @@ function imageType(buf) {
 }
 function imageSize(buf) {
   try {
-    if (buf[0] === 0x89 && buf[1] === 0x50) { // PNG
-      return { w: buf.readUInt32BE(16), h: buf.readUInt32BE(20) };
+    if (buf[0] === 0x89 && buf[1] === 0x50) { // PNG：IHDR 的宽/高位于字节 16/20
+      return { w: u32(buf, 16), h: u32(buf, 20) };
     }
-    if (buf[0] === 0xFF && buf[1] === 0xD8) { // JPEG
+    if (buf[0] === 0xFF && buf[1] === 0xD8) { // JPEG：扫描 SOF 段取宽高
       let off = 2;
       while (off + 9 < buf.length) {
         if (buf[off] !== 0xFF) { off++; continue; }
         const marker = buf[off + 1];
         if (marker >= 0xC0 && marker <= 0xCF && marker !== 0xC4 && marker !== 0xC8 && marker !== 0xCC) {
-          return { w: buf.readUInt16BE(off + 7), h: buf.readUInt16BE(off + 5) };
+          return { w: u16(buf, off + 7), h: u16(buf, off + 5) };
         }
-        const len = buf.readUInt16BE(off + 2);
+        const len = u16(buf, off + 2);
         off += 2 + len;
       }
     }
@@ -52,17 +97,24 @@ function imageSize(buf) {
 }
 const EMU = 9525;        // 1px = 9525 EMU
 const IMG_MAX_W = 550;    // 单图最大宽度（px），超出按比例缩放
+const IMG_MAX_H = 720;    // 单图最大高度（px），超出按比例缩放（防细长图撑破页面）
 
+// wp:inline 自包含声明全部所需命名空间，不依赖 document 根节点；id 随图递增，避免多图冲突
 function imagePara(info) {
-  const cx = info.cx, cy = info.cy, rId = info.rId;
-  return `<w:p><w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0">` +
+  const cx = info.cx, cy = info.cy, rId = info.rId, id = info.id || 1;
+  const WP = 'http://schemas.openxmlformats.org/drawingml/2006/wordprocessingdrawing';
+  const A = 'http://schemas.openxmlformats.org/drawingml/2006/main';
+  const PIC = 'http://schemas.openxmlformats.org/drawingml/2006/picture';
+  const R = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+  return `<w:p><w:r><w:drawing>` +
+    `<wp:inline distT="0" distB="0" distL="0" distR="0" xmlns:wp="${WP}" xmlns:a="${A}" xmlns:pic="${PIC}" xmlns:r="${R}">` +
     `<wp:extent cx="${cx}" cy="${cy}"/><wp:effectExtent l="0" t="0" r="0" b="0"/>` +
-    `<wp:docPr id="1" name="img"/><wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr>` +
-    `<a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">` +
-    `<pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="0" name="img"/><pic:cNvPicPr/></pic:nvPicPr>` +
+    `<wp:docPr id="${id}" name="img${id}"/><wp:cNvGraphicFramePr><a:graphicFrameLocks noChangeAspect="1"/></wp:cNvGraphicFramePr>` +
+    `<a:graphic><a:graphicData uri="${PIC}">` +
+    `<pic:pic><pic:nvPicPr><pic:cNvPr id="${id}" name="img${id}"/><pic:cNvPicPr/></pic:nvPicPr>` +
     `<pic:blipFill><a:blip r:embed="${rId}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>` +
-    `<pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic>` +
-    `</a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>`;
+    `<pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr>` +
+    `</pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>`;
 }
 
 function buildDocx(doc) {
@@ -78,18 +130,18 @@ function buildDocx(doc) {
     else if (b.type === 'table') body += table(b.rows || []);
     else if (b.type === 'page') body += '<w:p><w:r><w:br w:type="page"/></w:r></w:p>';
     else if (b.type === 'image') {
-      const buf = b.data;
+      const buf = toBuffer(b.data);
       const t = imageType(buf);
       if (t) {
-        const sz = imageSize(buf) || { w: IMG_MAX_W, h: 400 };
-        const w = Math.min(sz.w, IMG_MAX_W);
-        const scale = w / sz.w;
-        const cx = Math.round(w * EMU);
+        const sz = imageSize(buf) || { w: IMG_MAX_W, h: IMG_MAX_H };
+        const scale = Math.min(IMG_MAX_W / sz.w, IMG_MAX_H / sz.h);
+        const cx = Math.round(sz.w * scale * EMU);
         const cy = Math.round(sz.h * scale * EMU);
-        const rId = 'rIdImg' + (++imgCnt);
+        const id = ++imgCnt;
+        const rId = 'rIdImg' + id;
         const file = rId + '.' + t.ext;
         images.push({ buf: buf, rId: rId, file: file, ct: t.ct });
-        body += imagePara({ cx: cx, cy: cy, rId: rId });
+        body += imagePara({ cx: cx, cy: cy, rId: rId, id: id });
         if (b.caption) body += para(b.caption, { size: 18, color: '666666', align: 'center' });
       } else if (b.caption) {
         body += para(b.caption, { size: 18, color: '666666' });

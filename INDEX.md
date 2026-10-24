@@ -3,16 +3,18 @@
 本仓库 `D:\GitHub\Skill` 汇总微信小程序开发相关的 CodeBuddy skill。
 
 ## 一、全家桶整包（推荐：直接装这一个）
-`wx-miniprogram-suite/` —— 从零到可上架的脚手架编排 + 6 个配套 skill，共 7 个（**均为用户要求创作**）：
+`wx-miniprogram-suite/` —— 从零到可上架的脚手架编排 + 8 个配套 skill，共 9 个（**均为用户要求创作**）：
 
 | Skill | 角色 |
 |---|---|
 | `wx-miniprogram-scaffold` | 编排层（agent 工作流：需求→骨架→合规→云调用→支付→红线审计→提审） |
 | `wx-miniprogram-blueprint` | 合规三件套 + 云调用封装 + 提审清单 |
+| `wx-miniprogram-publish` | **上架控制台 + 提审 SOP（小白分步指引）** ← 新增 |
 | `wx-virtual-payment` | 微信虚拟支付双签名 + 发货回调幂等 |
 | `miniprogram-redline-audit` | 红线自动审计（3 个零依赖脚本） |
 | `miniprogram-guardrails` | 防踩坑护栏 |
 | `miniprogram-docx` | 纯前端 DOCX 导出 |
+| `doc-scan-ocr` | **扫描件/图片 → 表格抽取（零安装）** ← 新增 |
 | `cloudbase-ai-textgen` | 云开发 AI 文本生成 |
 
 ## 二、红线审计说明
@@ -21,7 +23,7 @@
 
 ## 三、发布到 SkillHub
 - 全家桶：`cd wx-miniprogram-suite && powershell -ExecutionPolicy Bypass -File publish.ps1`
-- 全部 7 个（仓库根执行）：`powershell -ExecutionPolicy Bypass -File publish-all.ps1`
+- 全部 9 个（仓库根执行）：`powershell -ExecutionPolicy Bypass -File publish-all.ps1`
 - 前置：`skillhub login`
 - 注：本仓库早期曾并列 3 个独立工具目录（`wechat-devtools-cli` / `miniprogram-automator-boost` / `wxapp-paywall-smoke`），**当前已不在该仓库**；它们非本会话创作、权属待定，不纳入发布。
 
@@ -29,3 +31,7 @@
 - 每个 skill 自带 `SKILL.md`（YAML frontmatter: `name` / `description`）、`scripts/`、`references/`。
 - 脚本一律零依赖 node，纯本地、不联网；退出码统一：0=通过，1=有问题，2=环境/用法错误。
 - 启发式检查的结果一律标注「需人工复核」，不把建议项说成硬性问题。
+
+## 四、经验沉淀母档
+- 项目侧可复用资产与踩坑总表：`doc/新项目复用资产清单.md`（建筑全过程助手项目内）。
+- 新 skill 的候选来源、云开发/memory 注意事项，均先记该项目档，再择优固化到本仓库。
