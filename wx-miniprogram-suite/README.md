@@ -79,6 +79,16 @@ SkillHub 的发布单位是**单个 skill**（一个 Slug + 一个显示名称�
 > 注意：`scaffold` 运行时按 `name` 加载其余 skill，请一并安装，不要只装单个。
 > `category` 取值以平台创建页下拉为准（本仓库示例填 `开发` / `效率`），如平台有固定枚举请按需调整。
 
+### frontmatter 写法红线（平台 YAML 解析很严格）
+
+- **值里出现 `: `（冒号+空格）必须整体加引号**，否则报
+  `frontmatter 无法解析 (yaml: line N: mapping values are not allowed in this context)`。
+  例：`description_en: 'End-to-end launch & review SOP: code preflight, ...'`
+- 值里出现 ` #`（空格+井号）、或以 `- ? : , [ ] { } # & * ! | > ' " % @ `` ` `` 开头时，同样要加引号。
+- 中文全角冒号 `：` **不触发**该问题（`description` / `description_zh` 里的「触发词：」属于安全写法）。
+- 改完 frontmatter 建议本地用 PyYAML 过一遍再打包：
+  `python -c "import yaml;yaml.safe_load(open('SKILL.md',encoding='utf-8').read().split('---')[1])"`
+
 ## 发布到 SkillHub（备用，需补回 slug）
 
 `publish.ps1` / `publish-all.ps1` 仍保留，但它们依赖 SkillHub 的 `slug` / `displayName` 字段——本仓库为适配开放平台已**移除**这些字段。若仍需发 SkillHub，请在每个 SKILL.md 的 frontmatter 补回 `slug:` 与 `displayName:`，再 `skillhub login` 后执行脚本。

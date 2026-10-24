@@ -4,7 +4,7 @@ display_name: 小程序防踩坑护栏
 display_name_en: Mini Program Guardrails
 description: 开发/改小程序前提供点击锁、存储封装、演示数据等防踩坑护栏（触发词：防踩坑 / 护栏 / 存储封装）。
 description_zh: 点击锁、存储封装、演示数据、幂等等高频踩坑护栏原则与落地示例。
-description_en: Guardrails against common mini program pitfalls: click-lock, storage wrappers, demo data, idempotency.
+description_en: 'Guardrails against common mini program pitfalls: click-lock, storage wrappers, demo data, idempotency.'
 category: 开发
 version: 1.0.0
 author: Mr0752

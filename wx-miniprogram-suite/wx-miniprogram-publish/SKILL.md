@@ -4,7 +4,7 @@ display_name: 小程序上架与提审指引
 display_name_en: Mini Program Launch & Review SOP
 description: 从小程序代码体检到上传提审、驳回应对的分步操作单（触发词：上架 / 提审 / 审核被拒 / 虚拟支付怎么配）。
 description_zh: 从代码体检到控制台配置、虚拟支付、上传提审、驳回应对的端到端分步操作单，小白可直接跟随。
-description_en: End-to-end launch & review SOP: code preflight, console setup, virtual payment, upload, rejection handling.
+description_en: 'End-to-end launch & review SOP: code preflight, console setup, virtual payment, upload, rejection handling.'
 category: 开发
 version: 1.0.0
 author: Mr0752

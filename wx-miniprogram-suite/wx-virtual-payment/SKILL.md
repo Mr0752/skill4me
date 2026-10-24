@@ -4,7 +4,7 @@ display_name: 微信小程序虚拟支付
 display_name_en: WeChat Mini Program Virtual Payment
 description: 集成微信虚拟支付双签名、发货回调幂等与端上购买（触发词：虚拟支付 / 发货回调 / 双签名）。
 description_zh: 微信虚拟支付双签名、发货回调幂等、端上购买范式，含官方算法与必踩坑位。
-description_en: WeChat virtual payment end-to-end: dual signing, idempotent delivery callback and entitlement grant on cloud functions.
+description_en: 'WeChat virtual payment end-to-end: dual signing, idempotent delivery callback and entitlement grant on cloud functions.'
 category: 开发
 version: 1.0.0
 author: Mr0752
