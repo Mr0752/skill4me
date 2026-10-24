@@ -1,0 +1,13 @@
+> 本文件保存「关于我们」区块的 WXML 模板源码。使用时将下方代码块内容复制，并重命名为 `about-block.wxml`，放到「我的」页底部区块中。
+
+```wxml
+<!-- 关于我们区块（放在「我的」页底部，不要独立页以免双份维护文案漂移） -->
+<!-- js 从 utils/env.js setData：appName/version/contactEmail/icpNo/legalEntity -->
+<view class="about">
+  <view class="about-title">关于 {{appName}}</view>
+  <view class="about-row">版本 {{version}}</view>
+  <view class="about-row">开发者：{{legalEntity}}</view>
+  <view class="about-row link" bindtap="onCopyContact">联系我们：{{contactEmail}}（点击复制）</view>
+  <view class="about-copy">Copyright © {{legalEntity}}. All Rights Reserved.</view>
+</view>
+```

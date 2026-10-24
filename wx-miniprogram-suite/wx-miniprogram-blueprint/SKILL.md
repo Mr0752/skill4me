@@ -6,7 +6,7 @@ description: 新建微信小程序时提供合规三件套、云调用封装与�
 description_zh: 上架验证过的合规三件套（隐私/协议/关于）+ 云调用封装 + 提审清单模板，开箱即用。
 description_en: Drop-in compliance trio (privacy/agreement/about), cloud-call wrappers and pre-submission checklist distilled from shipped mini programs.
 category: 开发
-version: 1.0.0
+version: 1.0.1
 author: Mr0752
 ---
 
@@ -26,8 +26,13 @@ A reusable starter kit distilled from three cloud-development mini programs that
 2. Open `assets/privacy-policy.md`, `assets/user-agreement.md`, `assets/about-block.md`; copy the WXML code block contents and save them as `.wxml` files in `packageA/pages/` (or main `pages/`). Wire them into `app.json` `pages`, and place the about block at the bottom of the "我的" page. Replace `{{...}}`.
 3. Set app.json switches (see `references/compliance.md`): `__usePrivacyCheck__: true`, `darkmode`, `lazyCodeLoading: requiredComponents`. Add `components/privacy-popup` using the official `wx.requirePrivacyAuthorize` — **do NOT register `onNeedPrivacyAuthorization`** (popup clash on real device).
 4. Copy `assets/cloud.js` as the cloud-call wrapper (lazy init + timeout + silent fail + auto-degrade to local on repeated failure). Route ALL `wx.cloud.callFunction` through it. Keep db writes server-side only; upload files via cloud functions, not the client.
-5. Before first submission, run `node assets/tools/syntax-check.js <miniprogramRoot>` (轻量真机兼容闸门, detects `?. ?? ||= &&=`) for a quick local check, but the **full red-line audit** (WXML `{{}}` traps, tabBar 跳法, 手写 storage key, 四件套, 四层闭环) is the `miniprogram-redline-audit` skill — load it and run `scripts/audit-redlines.js` / `audit-paths.js` / `audit-closure.js`. Then follow `references/pitfalls.md` review checklist.
-6. For monetization, load the installed `wx-virtual-payment` skill: copy its assets for signature/delivery, and follow its three-price-consistency + `DEMO_MODE` rules.
+5. Before first submission, run the bundled checks (zero-dep Node, paths relative to this package):
+   - `node assets/tools/syntax-check.js <miniprogramRoot>` — 轻量真机兼容闸门（检测 `?.` `??` `||=` `&&=`）。
+   - `node assets/tools/audit-redlines.js <miniprogramRoot>` — 全量红线审计（WXML `{{}}` 陷阱、tabBar 跳法、手写 storage key、可选链等），硬性项必须清零。
+   - `node assets/tools/audit-paths.js <miniprogramRoot>` — 页面四件套完整性 + `app.json` 注册校验。
+   - `node assets/tools/audit-closure.js <miniprogramRoot>` — 四层交互闭环（导航/事件/数据/孤儿页）。
+   Then follow `references/pitfalls.md` review checklist.
+6. For monetization (enterprise/个体户 subject with a supporting category only), follow the virtual-payment rules in `references/pitfalls.md` section 五: signature/delivery samples, three-price consistency and `DEMO_MODE` handling.
 
 ## Key red-lines (tell the user; full list in references/pitfalls.md)
 - **真机兼容**: never use `?.` `??` `||=` `&&=` in client JS — real-device build silently fails to transpile, SyntaxError invisible in simulator/lint.

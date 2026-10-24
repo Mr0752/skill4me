@@ -76,7 +76,7 @@ SkillHub 的发布单位是**单个 skill**（一个 Slug + 一个显示名称�
 4. 提交后平台解析；若报"解析失败"，对照官方【技能基础结构】排查（或邮件 `openworkbuddy@tencent.com`）。
 5. 9 个全部上传完成即整套上线。
 
-> 注意：`scaffold` 运行时按 `name` 加载其余 skill，请一并安装，不要只装单个。
+> 注意：`wx-miniprogram-scaffold` 已做成**自包含**包（内置合规三件套、云封装、支付、DOCX、AI 文本、三支审计脚本与红线知识库副本），单独安装也能完整跑通；其余 8 个是专精包，建议一起装。
 > `category` 取值以平台创建页下拉为准（本仓库示例填 `开发` / `效率`），如平台有固定枚举请按需调整。
 
 ### frontmatter 写法红线（平台 YAML 解析很严格）
@@ -88,6 +88,35 @@ SkillHub 的发布单位是**单个 skill**（一个 Slug + 一个显示名称�
 - 中文全角冒号 `：` **不触发**该问题（`description` / `description_zh` 里的「触发词：」属于安全写法）。
 - 改完 frontmatter 建议本地用 PyYAML 过一遍再打包：
   `python -c "import yaml;yaml.safe_load(open('SKILL.md',encoding='utf-8').read().split('---')[1])"`
+
+### 内置文件缺失（第二类驳回原因）
+
+平台的文件质量检测会把 SKILL.md 里出现的 `references/…`、`scripts/…`、`templates/…`、`assets/…` 路径当作**必须随包提供**的资源，包内找不到就直接驳回：
+
+> 资产包缺少必需资源 1 项：文件「references/pitfalls.md」（SKILL.md 引用）
+> 评级结论：内置文件缺失
+
+另外 `xxx skill` 这种写法会被判成「缺少外部技能依赖」（实测：`is the \`miniprogram-redline-audit\` skill` → 驳回项「技能「miniprogram-redline-audit skill」」）。
+
+**结论：每个 zip 必须自包含**，不能写「运行时再加载另一个 skill 里面的文件」。
+
+本仓库的保障机制：
+
+| 脚本 | 作用 |
+|---|---|
+| `sync-shared.js` | 把共用资产/脚本从**源 skill** 同步进自包含包（scaffold ← 合规三件套 / 云封装 / 支付 / DOCX / AI 文本 / 三支审计脚本 / 红线知识库；blueprint ← 三支审计脚本）。打包前必须先跑，避免副本漂移。`--check` 只比对不写入。 |
+| `make_zips.py` | 重建 `zips/*.zip`：SKILL.md 在包根、正斜杠路径、UTF-8 文件名。 |
+| `check_skills.py` | **上传前门禁**：PyYAML 真实解析 frontmatter（必填字段 + 禁残留 `slug` 等）→ 逐个校验 SKILL.md 与 `references/*.md` 里所有包内路径真实存在 → 扫 `X skill` 外部依赖 → 校验每个 zip 内容与源目录一致。`--selftest` 自测，`--zip` 连 zip 一起校验。 |
+
+打包三步（**全绿再上传**）：
+
+```bash
+node sync-shared.js
+python make_zips.py
+python check_skills.py --zip
+```
+
+> 本机 PyYAML 只在系统 Python 3.12 里：`C:\Users\86135\AppData\Local\Programs\Python\Python312\python.exe`（managed 3.13/3.14 都没装且沙箱装不上）。
 
 ## 发布到 SkillHub（备用，需补回 slug）
 
