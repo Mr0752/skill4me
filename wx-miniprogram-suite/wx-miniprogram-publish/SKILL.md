@@ -1,11 +1,13 @@
 ---
-slug: mr0752-wx-mp-publish
-displayName: 小程序上架与提审指引
-version: 1.0.0
-summary: 从代码体检到控制台配置、虚拟支付、上传提审、驳回应对的端到端分步操作单，小白可直接跟随。
-license: MIT
 name: wx-miniprogram-publish
-description: WeChat mini-program launch & review-submission SOP — a beginner-friendly, step-by-step operational checklist covering the full path from local code preflight, MP console account setup, service-content declaration (privacy / UCG), virtual-payment configuration (sandbox → production), code upload, review submission, to post-submission tracking and rejection handling. Use this skill when the user says "上架", "提审", "提交审核", "怎么发布小程序", "审核被拒", "虚拟支付怎么配", or is preparing any WeChat mini program for first release or an update review. It encodes the order-critical steps (virtual payment requires the mini program to be published FIRST) and the high-frequency rejection causes (category / privacy declaration / payment / copywriting).
+display_name: 小程序上架与提审指引
+display_name_en: Mini Program Launch & Review SOP
+description: 从小程序代码体检到上传提审、驳回应对的分步操作单（触发词：上架 / 提审 / 审核被拒 / 虚拟支付怎么配）。
+description_zh: 从代码体检到控制台配置、虚拟支付、上传提审、驳回应对的端到端分步操作单，小白可直接跟随。
+description_en: End-to-end launch & review SOP: code preflight, console setup, virtual payment, upload, rejection handling.
+category: 开发
+version: 1.0.0
+author: Mr0752
 ---
 
 # 小程序上架与提审指引（可直接跟随）

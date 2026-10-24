@@ -1,11 +1,13 @@
 ---
-slug: mr0752-wx-mp-blueprint
-displayName: 微信小程序云开发起手式
-version: 1.0.0
-summary: 上架验证过的合规三件套（隐私/协议/关于）+ 云调用封装 + 提审清单模板，开箱即用。
-license: MIT
 name: wx-miniprogram-blueprint
-description: WeChat Mini Program cloud-development starter blueprint distilled from multiple shipped mini programs (AA Expense Split Assistant, Merchant Assistant, Whole-Process Construction Assistant). Use this skill when scaffolding a new WeChat mini program — it provides drop-in templates for the compliance trio (privacy policy / user agreement / about-us), a centralized config module (env.js), cloud-call/cloud-storage wrappers, onboarding red-lines and a pre-submission review checklist. Trigger when the user says "开个小程序", "新建小程序", "小程序脚手架", "隐私政策模板", "用户协议模板", "关于我们", or is starting / reviewing any new WeChat mini program project.
+display_name: 微信小程序云开发起手式
+display_name_en: WeChat Mini Program CloudDev Starter
+description: 新建微信小程序时提供合规三件套、云调用封装与提审清单（触发词：开小程序 / 隐私政策模板 / 提审清单）。
+description_zh: 上架验证过的合规三件套（隐私/协议/关于）+ 云调用封装 + 提审清单模板，开箱即用。
+description_en: Drop-in compliance trio (privacy/agreement/about), cloud-call wrappers and pre-submission checklist distilled from shipped mini programs.
+category: 开发
+version: 1.0.0
+author: Mr0752
 ---
 
 # WeChat Mini Program Blueprint (云开发起手式)

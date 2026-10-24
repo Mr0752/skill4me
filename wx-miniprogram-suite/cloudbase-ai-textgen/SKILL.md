@@ -1,11 +1,13 @@
 ---
-slug: mr0752-wx-mp-cloudbase-ai-textgen
-displayName: 云开发 AI 文本生成
-version: 1.0.0
-summary: 基于云函数 @cloudbase/node-sdk 调用混元等模型的服务器端文本生成范式。
-license: MIT
 name: cloudbase-ai-textgen
-description: WeChat CloudBase (云开发) AI text generation from a cloud function using @cloudbase/node-sdk — init, createModel("cloudbase"), generateText/streamText with model hy3, messages array, token usage, and the enable-model-switch prerequisite. Use when a mini program needs server-side LLM text generation (draft content, summaries, document text) via CloudBase AI rather than a third-party API. Trigger on "云开发AI", "CloudBase AI", "混元", "AI生成文本", "大模型生成", or integrating an LLM into a cloud function.
+display_name: 云开发 AI 文本生成
+display_name_en: CloudBase AI Text Generation
+description: 在云函数里用 @cloudbase/node-sdk 调用混元等模型做服务端文本生成（触发词：云开发AI / CloudBase AI / 混元）。
+description_zh: 基于云函数 @cloudbase/node-sdk 调用混元等模型的服务器端文本生成范式。
+description_en: Server-side LLM text generation in a cloud function via @cloudbase/node-sdk (hy3, token usage, model switch).
+category: 开发
+version: 1.0.0
+author: Mr0752
 ---
 
 # CloudBase AI Text Generation (云开发 AI)

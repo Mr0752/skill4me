@@ -1,11 +1,13 @@
 ---
-slug: mr0752-wx-mp-guardrails
-displayName: 小程序防踩坑护栏
-version: 1.0.0
-summary: 点击锁、存储封装、演示数据、幂等等高频踩坑护栏原则与落地示例。
-license: MIT
 name: miniprogram-guardrails
-description: 微信小程序（含云开发）开发红线与避坑指南。This skill should be used when developing or modifying a WeChat mini-program, especially before adding any background sync/polling, cloud functions, or timers; before a real-device release; or before submitting for review. It encodes hard-won red lines that local emulators, IDE, and linters cannot catch — WXML compile-time traps (no method calls / no Chinese keys inside {{}}, wx:key="index" fails, no <b> tag), real-device-only syntax bans (?./??/||=/&&=), tabBar navigation must use switchTab, no vertical padding on native input/textarea, forbidden flex:...calc(), cloud-sync blind-polling quota burn, Storage key discipline, modal/canvas interaction traps, copy/文案 compliance (承诺=实现), and AI-collaboration discipline (verify on disk, not blame the runtime).
+display_name: 小程序防踩坑护栏
+display_name_en: Mini Program Guardrails
+description: 开发/改小程序前提供点击锁、存储封装、演示数据等防踩坑护栏（触发词：防踩坑 / 护栏 / 存储封装）。
+description_zh: 点击锁、存储封装、演示数据、幂等等高频踩坑护栏原则与落地示例。
+description_en: Guardrails against common mini program pitfalls: click-lock, storage wrappers, demo data, idempotency.
+category: 开发
+version: 1.0.0
+author: Mr0752
 ---
 
 # 小程序开发红线与避坑指南

@@ -1,11 +1,13 @@
 ---
-slug: mr0752-wx-mp-scaffold
-displayName: 微信小程序脚手架工作流
-version: 1.0.0
-summary: 从零到可上架的微信小程序 agent 工作流，编排合规三件套、云调用封装、虚拟支付、红线审计与提审清单。
-license: MIT
 name: wx-miniprogram-scaffold
-description: End-to-end WeChat Mini Program scaffolding workflow (agent-style). Orchestrates the wx-miniprogram-blueprint and wx-virtual-payment skills to take a new mini program from zero to a real-device-runnable, compliant, optionally-monetized baseline. Use when the user says "开新小程序", "搭个小程序", "脚手架", "从零做一个小程序", or wants a full new mini program project bootstrapped automatically step by step with the compliance trio, cloud-call wrapper, and optional virtual payment.
+display_name: 微信小程序脚手架工作流
+display_name_en: WeChat Mini Program Scaffold Workflow
+description: 从零搭建可上架微信小程序的 agent 工作流（触发词：开新小程序 / 脚手架 / 从零做小程序）。
+description_zh: 从零到可上架的微信小程序 agent 工作流，编排合规三件套、云调用封装、虚拟支付、红线审计与提审清单。
+description_en: End-to-end WeChat Mini Program scaffolding workflow orchestrating blueprint, virtual payment, redline audit and submission checklist.
+category: 开发
+version: 1.0.0
+author: Mr0752
 ---
 
 # WeChat Mini Program Scaffold Workflow (agent-style)

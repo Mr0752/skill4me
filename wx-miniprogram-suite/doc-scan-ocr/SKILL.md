@@ -1,11 +1,13 @@
 ---
-slug: mr0752-doc-scan-ocr
-displayName: 扫描件/图片转表格（零安装）
-version: 1.0.0
-summary: Windows 自带 OCR 做扫描件与图片的表格抽取，输出 md/json/csv，不用装 Python/Paddle/MinerU。
-license: MIT
 name: doc-scan-ocr
-description: Turn scanned PDFs, photos, screenshots, docx and xlsx into structured md/json/csv tables using only the Windows built-in OCR engine — zero installs, no Python, no PaddleOCR, no MinerU. Use this skill when the user says "扫描件", "PDF 拖不出文字", "图片转表格", "OCR", "提取表格", "转 Excel/CSV", or needs to convert any document (scanned or text-layer PDF, jpg/png/bmp/tif/webp, docx, xlsx) into machine-readable tables. It includes the input→tool decision table, three run modes (double-click / CLI / unattended scheduled task), exit-code contract, and the two hard Windows PowerShell traps (UTF-8 BOM required; PS 5.1 cannot use `if` as an expression).
+display_name: 扫描件/图片转表格（零安装）
+display_name_en: Scanned Doc / Image to Table (Zero-Install)
+description: 用 Windows 自带 OCR 把扫描件/图片转成 md/json/csv 表格（触发词：扫描件 / 图片转表格 / OCR / 转Excel）。
+description_zh: Windows 自带 OCR 做扫描件与图片的表格抽取，输出 md/json/csv，不用装 Python/Paddle/MinerU。
+description_en: Turn scanned PDFs/photos/docs into md/json/csv tables using only the Windows built-in OCR - zero installs.
+category: 效率
+version: 1.0.0
+author: Mr0752
 ---
 
 # 扫描件 / 图片 → 表格抽取（零安装）

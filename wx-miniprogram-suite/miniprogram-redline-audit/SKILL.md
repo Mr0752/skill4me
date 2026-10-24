@@ -1,11 +1,13 @@
 ---
-slug: mr0752-wx-mp-redline-audit
-displayName: 小程序红线自动审计
-version: 1.2.0
-summary: 零依赖扫描微信小程序红线（真机语法/WXML/tabBar/存储/四件套/交互闭环），提审前体检。
-license: MIT
 name: miniprogram-redline-audit
-description: 自动审计微信小程序（含云开发）是否踩中开发红线。当用户说"审计/检查/扫描我的小程序红线""提审前帮我排查风险""真机白屏/列表错乱排查""检查一下有没有盲轮询、可选链、手写 storage 前缀、tabBar 跳转""页面四件套缺失""导航/事件/数据/孤儿页闭环"等时使用。技能会扫描指定小程序目录，输出按严重度分组的红线审计报告（JS 真机不兼容语法、setInterval 盲轮询、navigateTo 跳 tabBar、手写 storage key、wx:key="index"、{{}} 方法调用/中文键、<b> 组件、页面四件套、四层交互闭环等），每条标注违反的红线条目与修复法，可直接当提审前体检。
+display_name: 小程序红线自动审计
+display_name_en: Mini Program Redline Audit
+description: 提审前自动扫描微信小程序红线风险（触发词：审计红线 / 提审前排查 / 真机白屏）。
+description_zh: 零依赖扫描微信小程序红线（真机语法/WXML/tabBar/存储/四件套/交互闭环），提审前体检。
+description_en: Zero-dependency audit of WeChat mini program red lines (real-device syntax, WXML, tabBar, storage, four-piece, interaction loops).
+category: 开发
+version: 1.2.0
+author: Mr0752
 ---
 
 # 小程序红线自动审计（工具型 Skill）

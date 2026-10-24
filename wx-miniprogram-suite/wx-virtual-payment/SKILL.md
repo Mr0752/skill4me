@@ -1,11 +1,13 @@
 ---
-slug: mr0752-wx-mp-virtual-payment
-displayName: 微信小程序虚拟支付
-version: 1.0.0
-summary: 微信虚拟支付双签名、发货回调幂等、端上购买范式，含官方算法与必踩坑位。
-license: MIT
 name: wx-virtual-payment
-description: WeChat Mini Program virtual payment (wx.requestVirtualPayment) end-to-end integration — server-side dual signing (paySig with appKey, signature with session_key), the delivery callback (xpay_goods_deliver_notify) handling with idempotency, and entitlement grant. Use this skill when building a paid mini program that sells digital goods via WeChat virtual payment (subscriptions, in-app items, seat add-ons) and needs the full order → sign → pay → deliver → grant flow on cloud functions, compliant with WeChat virtual-payment rules and iOS/Apple routing.
+display_name: 微信小程序虚拟支付
+display_name_en: WeChat Mini Program Virtual Payment
+description: 集成微信虚拟支付双签名、发货回调幂等与端上购买（触发词：虚拟支付 / 发货回调 / 双签名）。
+description_zh: 微信虚拟支付双签名、发货回调幂等、端上购买范式，含官方算法与必踩坑位。
+description_en: WeChat virtual payment end-to-end: dual signing, idempotent delivery callback and entitlement grant on cloud functions.
+category: 开发
+version: 1.0.0
+author: Mr0752
 ---
 
 # WeChat Mini Program Virtual Payment

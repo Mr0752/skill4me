@@ -1,11 +1,13 @@
 ---
-slug: mr0752-wx-mp-docx
-displayName: 小程序纯前端 DOCX 导出
-version: 1.0.0
-summary: 零依赖 OOXML 生成 Word 文档，支持嵌入图片，适合小程序端导出报告。
-license: MIT
 name: miniprogram-docx
-description: Pure front-end DOCX (Word) generation for WeChat Mini Programs — zero npm dependencies, builds real .docx via OOXML (zip + xml) with block types heading/paragraph/table/page-break/image. Use when a mini program needs to export or generate Word documents client-side or in a cloud function without any third-party library or Office install. Trigger on "导出Word", "生成docx", "DOCX导出", "Word文档", or any need to produce .docx deliverables.
+display_name: 小程序纯前端 DOCX 导出
+display_name_en: Mini Program Pure-Frontend DOCX Export
+description: 小程序端零依赖导出 Word 文档（触发词：导出Word / 生成docx / DOCX导出）。
+description_zh: 零依赖 OOXML 生成 Word 文档，支持嵌入图片，适合小程序端导出报告。
+description_en: Pure front-end DOCX (Word) generation via zero-dependency OOXML, with image embedding support.
+category: 开发
+version: 1.0.0
+author: Mr0752
 ---
 
 # Mini Program DOCX Export (纯前端)

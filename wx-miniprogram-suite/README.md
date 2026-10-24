@@ -66,6 +66,23 @@ SkillHub 的发布单位是**单个 skill**（一个 Slug + 一个显示名称�
 
 > 已统一使用 `mr0752-wx-mp-*` / `mr0752-*` 前缀降低冲突概率。若仍报 `409 slug 已被占用`，继续加长前缀即可。
 
+## 发布到 WorkBuddy 开放平台（open.workbuddy.cn，推荐）
+
+本套件现已采用 **WorkBuddy 开放平台** 的 SKILL.md frontmatter 格式（`name` / `display_name` / `display_name_en` / `description` / `description_zh` / `description_en` / `category` / `version` / `author`），可直接上传。
+
+1. 打开 [open.workbuddy.cn](https://open.workbuddy.cn) → 左侧【专家·技能·连接器】→【技能】→【技能市场】。
+2. 右上角【添加技能】→【创建技能】，选择**上传 zip 包**。
+3. 逐个上传 `zips/` 下 9 个 zip（`wx-miniprogram-scaffold.zip` … `wx-miniprogram-publish.zip`、`doc-scan-ocr.zip`）。每个 zip 内 `SKILL.md` 已在根目录，平台会自动读取 `display_name` / `description` / `category` 等。
+4. 提交后平台解析；若报"解析失败"，对照官方【技能基础结构】排查（或邮件 `openworkbuddy@tencent.com`）。
+5. 9 个全部上传完成即整套上线。
+
+> 注意：`scaffold` 运行时按 `name` 加载其余 skill，请一并安装，不要只装单个。
+> `category` 取值以平台创建页下拉为准（本仓库示例填 `开发` / `效率`），如平台有固定枚举请按需调整。
+
+## 发布到 SkillHub（备用，需补回 slug）
+
+`publish.ps1` / `publish-all.ps1` 仍保留，但它们依赖 SkillHub 的 `slug` / `displayName` 字段——本仓库为适配开放平台已**移除**这些字段。若仍需发 SkillHub，请在每个 SKILL.md 的 frontmatter 补回 `slug:` 与 `displayName:`，再 `skillhub login` 后执行脚本。
+
 ## 合规声明
 
 - 虚拟支付 / 合规三件套类 skill 仅提供**技术范式**，以微信官方文档与平台审核要求为准，**不保证通过审核**。
